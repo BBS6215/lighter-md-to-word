@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "profiles": [
+    {
+      "id": "default",
+      "name": "默认配置",
+      "settings": {
+        "styles": {
+          "title": {
+            "font": "方正小标宋简体",
+            "size": 22,
+            "bold": false,
+            "alignment": "center",
+            "indentChars": 0
+          },
+          "h1": {
+            "font": "黑体",
+            "size": 16,
+            "bold": false,
+            "alignment": "justify",
+            "indentChars": 2
+          },
+          "h2": {
+            "font": "楷体_GB2312",
+            "size": 16,
+            "bold": true,
+            "alignment": "justify",
+            "indentChars": 2
+          },
+          "h3": {
+            "font": "仿宋_GB2312",
+            "size": 16,
+            "bold": true,
+            "alignment": "justify",
+            "indentChars": 2
+          },
+          "h4": {
+            "font": "仿宋_GB2312",
+            "size": 16,
+            "bold": true,
+            "alignment": "justify",
+            "indentChars": 2
+          },
+          "body": {
+            "font": "仿宋_GB2312",
+            "size": 16,
+            "bold": false,
+            "alignment": "justify",
+            "indentChars": 2
+          }
+        },
+        "paragraph": {
+          "line": 28,
+          "before": 0,
+          "after": 0
+        },
+        "margins": {
+          "top": 2.54,
+          "right": 3.175,
+          "bottom": 2.54,
+          "left": 3.175
+        },
+        "pageNumber": {
+          "enabled": true,
+          "size": 9,
+          "alignment": "center",
+          "format": "number"
+        }
+      }
+    }
+  ]
+}

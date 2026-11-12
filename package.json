@@ -1,0 +1,38 @@
+{
+  "name": "md2word-local",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Offline Markdown to Word with a standalone HTML app and a local CLI",
+  "license": "MIT",
+  "engines": { "node": ">=22.12" },
+  "packageManager": "pnpm@10.28.1",
+  "bin": { "md2word": "./build/cli.js" },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:browser": "playwright test",
+    "cli": "node build/cli.js",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm test:browser"
+  },
+  "dependencies": {
+    "docx": "9.6.1",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "unified": "11.0.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/mdast": "4.0.4",
+    "@types/node": "24.10.0",
+    "esbuild": "0.28.2",
+    "fflate": "0.8.3",
+    "typescript": "5.9.3",
+    "vite": "8.3.8",
+    "vite-plugin-singlefile": "2.3.4",
+    "vitest": "5.1.0"
+  },
+  "pnpm": { "onlyBuiltDependencies": ["esbuild"] }
+}

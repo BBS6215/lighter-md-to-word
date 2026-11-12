@@ -1,0 +1,23 @@
+name: Check
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.28.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+      - run: git diff --exit-code -- md2word.html THIRD_PARTY_LICENSES.txt examples/profiles.example.json
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:browser

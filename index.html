@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src 'none'; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <meta name="description" content="离线 Markdown 转 Word，三套排版配置，双击即用。">
+  <title>MD → Word · 离线排版工具</title>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand"><span class="brand-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M7 3h7l4 4v14H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z" stroke="currentColor" stroke-width="1.7"/><path d="M14 3v5h5M8 12h7M8 16h7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span><div><span class="brand-name">MD <span class="brand-arrow">→</span> Word</span><span class="brand-caption">离线排版工具</span></div></div>
+    <span class="offline-badge"><span></span> 在本机完成转换</span>
+  </header>
+  <main class="app-main">
+    <section class="intro"><div><h1>把最终稿，变成可用的 Word。</h1><p>粘贴 Markdown，选好格式，直接导出。正文不会上传或留存。</p></div></section>
+    <section class="action-bar" aria-label="转换操作">
+      <div class="profile-picker"><label for="profile-select">排版配置</label><select id="profile-select" aria-label="排版配置"></select><button id="settings-button" class="button button-quiet" type="button">格式设置</button></div>
+      <div class="export-controls"><label for="filename" class="sr-only">Word 文件名</label><input id="filename" type="text" placeholder="Word 文件名" maxlength="120" aria-label="Word 文件名"><span class="extension">.docx</span><button id="export-word" class="button button-primary" type="button" disabled>导出 Word <span aria-hidden="true">↗</span></button></div>
+    </section>
+    <div id="app-message" class="message" role="status" aria-live="polite" hidden></div>
+    <section class="workspace">
+      <section class="editor-panel panel"><div class="panel-heading"><div><span class="panel-dot"></span><h2>Markdown 原文</h2></div><div class="panel-actions"><button id="import-markdown" class="text-button" type="button">导入文件</button><button id="clear-button" class="text-button" type="button" disabled>清除</button></div></div><textarea id="markdown" spellcheck="false" aria-label="Markdown 原文" placeholder="在这里粘贴最终稿，或把 .md / .txt 文件拖进来…&#10;&#10;# 文档大标题&#10;## 一级标题&#10;### 二级标题&#10;#### 三级标题&#10;##### 四级标题&#10;&#10;正文会按照所选配置排版。"></textarea><div class="panel-footer"><span id="source-stats">原文 0 字符</span><span>刷新或关闭后清空</span></div><input id="markdown-file" type="file" accept=".md,.markdown,.txt" hidden></section>
+      <section class="preview-panel panel"><div class="panel-heading"><div><span class="panel-dot preview-dot"></span><h2>Word 内容预览</h2></div><span class="preview-tag">近似排版</span></div><div id="preview-viewport" class="preview-viewport"><div id="preview-empty" class="empty-state"><span class="empty-symbol" aria-hidden="true">Aa</span><h3>你的文稿，会在这里成形</h3><p>标题、正文和表格使用同一套排版规则。<br>最终分页以 Word / WPS 打开效果为准。</p></div><article id="paper" class="paper" hidden><div id="preview-content"></div></article></div><div class="panel-footer"><span id="body-stats">正文 0 字符</span><span id="profile-caption">默认配置</span></div></section>
+    </section>
+    <aside id="conversion-warnings" class="warnings" aria-label="转换提示" hidden></aside>
+    <footer class="app-footer"><span id="storage-status" role="status">正在读取配置…</span><span>单文件 · 无账号 · 无历史记录</span></footer>
+    <div id="undo-toast" class="undo-toast" role="status" hidden><span>正文已清除</span><button id="undo-button" type="button">撤销清除</button></div>
+  </main>
+  <dialog id="settings-dialog" aria-labelledby="settings-title"><div class="dialog-heading"><div><span class="eyebrow">FORMAT SETTINGS</span><h2 id="settings-title">把常用格式，保存下来</h2></div><button id="close-settings" class="icon-button" type="button" aria-label="关闭格式设置">×</button></div>
+    <div class="dialog-content"><section class="settings-section profile-management"><div class="section-label"><h3>配置管理</h3><span id="profile-count">1 / 3 套</span></div><div class="management-row"><label for="profile-name">当前名称</label><input id="profile-name" maxlength="40"><button id="create-profile" class="button button-secondary" type="button">复制为新配置</button><button id="delete-profile" class="text-button danger" type="button">删除</button></div><div id="new-profile-row" class="management-row" hidden><label for="new-profile-name">新名称</label><input id="new-profile-name" maxlength="40" placeholder="例如：会议材料"><button id="confirm-create" class="button button-secondary" type="button">创建配置</button><button id="cancel-create" class="text-button" type="button">取消</button></div><p class="hint">默认配置始终保留。页面记住上次选择；本地 AI 未指定时固定使用默认配置。</p></section>
+    <section class="settings-section"><div class="section-label"><h3>文字样式</h3><button id="detect-fonts" class="text-button" type="button">检测本机字体</button></div><p id="font-status" class="hint">可以直接填写已安装的字体名称。字体检测不可用时仍可导出；未安装字体可能被 Word 替换。</p><div id="style-fields"></div><datalist id="font-options"></datalist></section>
+    <section class="settings-section"><div class="section-label"><h3>段落与页面</h3><span>适用于大标题、一级至四级标题及正文</span></div><div id="paragraph-fields" class="settings-grid"></div><div id="margin-fields" class="settings-grid"></div></section>
+    <section class="settings-section"><div class="section-label"><h3>页码</h3></div><div id="page-fields" class="settings-grid"></div></section>
+    <section class="settings-section config-transfer"><h3>备份配置 / 交给本地 AI</h3><p class="hint">修改格式后导出一次 JSON，再用 CLI 导入。配置不变时无需重复操作，正文不会写进配置。</p><div class="transfer-actions"><button id="export-profiles" class="button button-secondary" type="button">导出 AI 配置（JSON）</button><button id="import-profiles" class="button button-quiet" type="button">导入配置</button><input id="profiles-file" type="file" accept=".json,application/json" hidden></div></section>
+    <div id="settings-error" class="message error" role="alert" hidden></div></div>
+    <div class="dialog-footer"><button id="reset-profile" class="text-button" type="button">恢复当前配置的出厂格式</button><div><span id="dialog-save-status">配置会自动尝试保存</span><button id="done-settings" class="button button-primary" type="button">完成</button></div></div>
+  </dialog>
+  <script type="module" src="/src/browser/main.ts"></script>
+</body>
+</html>
