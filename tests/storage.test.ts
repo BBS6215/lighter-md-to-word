@@ -14,6 +14,8 @@ describe('safe local file operations', () => {
     await importProfiles(path, old);
     const next = defaultStore(); next.profiles[0].settings.paragraph.line = 32;
     await expect(importProfiles(path, { ...next, profiles: [] })).rejects.toThrow();
+    const invalidFont = defaultStore(); invalidFont.profiles[0].settings.styles.body.font = '字体\ufffe';
+    await expect(importProfiles(path, invalidFont)).rejects.toThrow('U+FFFE');
     await expect(importProfiles(path, next, { beforeReplace() { throw new Error('simulated interruption'); } })).rejects.toThrow('simulated');
     expect(await readFile(path, 'utf8')).toBe(serializeStore(old));
     expect((await readdir(join(path, '..'))).filter(name => name.endsWith('.tmp'))).toEqual([]);

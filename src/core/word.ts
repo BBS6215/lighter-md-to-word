@@ -8,6 +8,7 @@ import type { DocumentModel, Inline, ParagraphBlock, TableBlock } from './model'
 import type { FormatSettings, StyleKey, TextStyle } from './profiles';
 import { STYLE_KEYS, validateSettings } from './profiles';
 import { blockStyleKey, contextIndent } from './preview';
+import { assertXmlText } from './xml-text';
 
 const cm = (value: number) => Math.round(value * 1440 / 2.54);
 const pt = (value: number) => Math.round(value * 20);
@@ -20,6 +21,8 @@ function spacing(settings: FormatSettings) {
 }
 function wordRuns(runs: Inline[], style: TextStyle, heading: boolean, code: boolean): (TextRun | ExternalHyperlink)[] {
   return runs.flatMap<TextRun | ExternalHyperlink>(run => {
+    assertXmlText(run.text, '正文片段');
+    if (run.href !== undefined) assertXmlText(run.href, '链接目标');
     if (run.break) return [new TextRun({ break: 1 })];
     const parts = code ? run.text.split(/\r?\n/u) : [run.text.replace(/\r?\n/gu, ' ')];
     const children = parts.flatMap((text, index) => {
@@ -40,7 +43,7 @@ function createParagraph(block: ParagraphBlock, settings: FormatSettings): Parag
   const children = wordRuns(block.runs, style, block.kind === 'heading', block.kind === 'code');
   const marker = block.marker;
   if (marker?.kind === 'number' || marker?.kind === 'task') {
-    const prefix = marker.kind === 'number' ? `${marker.number}. ` : `${marker.number ? `${marker.number}. ` : ''}${marker.checked ? '☑' : '☐'} `;
+    const prefix = marker.kind === 'number' ? `${marker.number}. ` : `${marker.number !== undefined ? `${marker.number}. ` : ''}${marker.checked ? '☑' : '☐'} `;
     children.unshift(...wordRuns([{ text: prefix }], style, false, false));
   }
   const options: IParagraphOptions = {
@@ -87,6 +90,7 @@ function footer(settings: FormatSettings): Footer {
   return new Footer({ children: [new Paragraph({ alignment: alignment[settings.pageNumber.alignment], spacing: { before: 0, after: 0 }, indent: { firstLine: 0 }, children })] });
 }
 export function createWordDocument(model: DocumentModel, inputSettings: FormatSettings): Document {
+  assertXmlText(model.title, '文档标题');
   const settings = validateSettings(inputSettings);
   const paragraphStyles = STYLE_KEYS.map(key => ({
     id: styleId[key], name: key === 'title' ? 'Title' : key === 'body' ? 'Normal' : `Heading ${key.slice(1)}`,

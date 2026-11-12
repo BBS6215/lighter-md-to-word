@@ -37,7 +37,7 @@ export function renderPreview(model: DocumentModel, settings: FormatSettings): s
     let marker = '';
     if (block.marker?.kind === 'bullet') marker = '• ';
     if (block.marker?.kind === 'number') marker = `${block.marker.number}. `;
-    if (block.marker?.kind === 'task') marker = `${block.marker.number ? `${block.marker.number}. ` : ''}${block.marker.checked ? '☑' : '☐'} `;
+    if (block.marker?.kind === 'task') marker = `${block.marker.number !== undefined ? `${block.marker.number}. ` : ''}${block.marker.checked ? '☑' : '☐'} `;
     const tag = block.kind === 'heading' ? `h${Math.min((block.level ?? 0) + 1, 6)}` : block.kind === 'code' ? 'pre' : 'p';
     const firstIndent = block.depth || block.quote || block.kind === 'code' ? 0 : style.indentChars;
     const css = `font-family:${cssFont(style.font)},serif;font-size:${style.size}pt;font-weight:${style.bold ? 700 : 400};line-height:${settings.paragraph.line}pt;text-align:${block.kind === 'code' ? 'left' : style.alignment};text-indent:${firstIndent}em;margin:${settings.paragraph.before}pt 0 ${settings.paragraph.after}pt ${indent}pt;`;

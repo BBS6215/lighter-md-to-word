@@ -1,3 +1,5 @@
+import { assertXmlText } from './xml-text';
+
 export type Alignment = 'left' | 'center' | 'right' | 'justify';
 export const STYLE_KEYS = ['title', 'h1', 'h2', 'h3', 'h4', 'body'] as const;
 export type StyleKey = (typeof STYLE_KEYS)[number];
@@ -48,6 +50,7 @@ function text(value: unknown, label: string, max: number): string {
   if (typeof value !== 'string' || !value.trim() || value.length > max || /[\u0000-\u001f\u007f]/u.test(value)) {
     throw new Error(`${label}不能为空、过长或含控制字符`);
   }
+  assertXmlText(value, label);
   return value.trim();
 }
 function choice<T extends string>(value: unknown, label: string, options: readonly T[]): T {

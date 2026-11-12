@@ -16,8 +16,8 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
-      - run: pnpm test
       - run: pnpm build
+      - run: pnpm test
       - run: git diff --exit-code -- md2word.html THIRD_PARTY_LICENSES.txt examples/profiles.example.json
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:browser

@@ -1,6 +1,6 @@
 {
   "name": "md2word-local",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Offline Markdown to Word with a standalone HTML app and a local CLI",
@@ -15,7 +15,7 @@
     "test": "vitest run",
     "test:browser": "playwright test",
     "cli": "node build/cli.js",
-    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm test:browser"
+    "check": "pnpm typecheck && pnpm build && pnpm test && pnpm test:browser"
   },
   "dependencies": {
     "docx": "9.6.1",

@@ -5,8 +5,9 @@ import { parseDocument } from '../core/model';
 import { parseStore, selectProfile } from '../core/profiles';
 import { generateWord } from '../core/word';
 import { importProfiles, readProfiles, writeUniqueDocx } from './storage';
+import { version } from '../../package.json';
 
-const HELP = `md2word-local 1.0.0 — offline Markdown to Word
+const HELP = `md2word-local ${version} — offline Markdown to Word
 
 convert --input <final.md> [--output <document.docx>] [--profile <id-or-name>] [--config <profiles.json>]
 profiles list [--config <profiles.json>]
@@ -29,7 +30,7 @@ function options(args: string[], allowed: string[]): Record<string, string> {
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
   if (!args.length || args.includes('--help') || args.includes('-h')) { process.stdout.write(HELP); return; }
-  if (args.length === 1 && args[0] === '--version') { process.stdout.write('1.0.0\n'); return; }
+  if (args.length === 1 && args[0] === '--version') { process.stdout.write(version + '\n'); return; }
   const command = args[0], action = command === 'profiles' ? args[1] : undefined;
   if (command !== 'convert' && !(command === 'profiles' && action && ['list', 'import'].includes(action))) throw new Error('未知命令，使用 --help 查看用法');
   const flags = options(args.slice(command === 'profiles' ? 2 : 1), command === 'convert' ? ['--input', '--output', '--profile', '--config'] : action === 'import' ? ['--input', '--config'] : ['--config']);
