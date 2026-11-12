@@ -34,6 +34,49 @@ async function releaseFirstConfig(page: Page) {
   });
 }
 
+for (const mode of ['picker', 'drop'] as const) for (const readFails of [false, true]) {
+  test(`invalid Markdown ${mode} selection discards an earlier ${readFails ? 'failed' : 'successful'} read`, async ({ page }) => {
+    await page.addInitScript(fails => {
+      const original = File.prototype.arrayBuffer;
+      File.prototype.arrayBuffer = async function () {
+        const bytes = await original.call(this);
+        if (this.name === 'A.md') await new Promise<void>((resolve, reject) => {
+          (window as unknown as { finishMarkdownRead: () => void }).finishMarkdownRead = () => fails ? reject(new Error('Synthetic read failure')) : resolve();
+        });
+        return bytes;
+      };
+    }, readFails);
+    await page.goto(app);
+    const text = '# 当前稿C\n\n保留正文C';
+    await page.locator('#markdown').fill(text); await expect(page.locator('#preview-content')).toContainText('保留正文C');
+    await page.locator('#filename').fill('当前文稿C');
+    await page.locator('#markdown-file').setInputFiles({ name: 'A.md', mimeType: 'text/markdown', buffer: Buffer.from('# 旧稿A\n\n不应替换的正文') });
+    await page.waitForFunction(() => typeof (window as unknown as { finishMarkdownRead?: unknown }).finishMarkdownRead === 'function');
+    if (mode === 'picker') {
+      await page.locator('#markdown-file').setInputFiles({ name: 'B.exe', mimeType: 'application/octet-stream', buffer: Buffer.from('invalid') });
+    } else {
+      await page.evaluate(() => {
+        const data = new DataTransfer(); data.items.add(new File(['invalid'], 'B.exe', { type: 'application/octet-stream' }));
+        document.dispatchEvent(new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true }));
+      });
+    }
+    await expect(page.locator('#app-message')).toContainText('请选择 .md');
+    await page.evaluate(async () => {
+      (window as unknown as { finishMarkdownRead: () => void }).finishMarkdownRead();
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    });
+    await expect(page.locator('#markdown')).toHaveValue(text);
+    await expect(page.locator('#filename')).toHaveValue('当前文稿C');
+    await expect(page.locator('#preview-content')).toContainText('保留正文C');
+    await expect(page.locator('#app-message')).toContainText('请选择 .md');
+    await page.locator('#markdown-file').setInputFiles({ name: 'D.md', mimeType: 'text/markdown', buffer: Buffer.from('# 新稿D\n\n新的合法正文') });
+    await expect(page.locator('#preview-content')).toContainText('新的合法正文');
+    await expect(page.locator('#filename')).toHaveValue('新稿D');
+    const download = page.waitForEvent('download'); await page.locator('#export-word').click();
+    expect((await download).suggestedFilename()).toBe('新稿D.docx');
+  });
+}
+
 test('failed parsing discards the previous preview and prevents stale downloads, then recovers', async ({ page }) => {
   await page.goto(app); await page.locator('#markdown').fill('# 旧稿A\n\n旧正文');
   await expect(page.locator('#preview-content')).toContainText('旧稿A');

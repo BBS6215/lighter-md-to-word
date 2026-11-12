@@ -133,6 +133,8 @@ export function parseDocument(markdown: string): DocumentModel {
     }
     const patterns = [/^([零〇一二三四五六七八九十百千万两]+)、/, /^[（(]([零〇一二三四五六七八九十百千万两]+)[）)]/, /^(\d+)[.．、]/, /^[（(](\d+)[）)]/];
     const index = level - 1, matched = source.match(patterns[index]);
+    // A new parent always starts a fresh child scope, including unsupported numbering.
+    for (let lower = index + 1; lower < 4; lower++) counters[lower] = undefined;
     if (index > 0 && counters[index - 1] === undefined) warn('存在跳级标题，请检查父级标题是否缺失；工具不会补写章节。');
     if (matched) {
       const value = index < 2 ? readChinese(matched[1]) : Number(matched[1]);
@@ -143,11 +145,9 @@ export function parseDocument(markdown: string): DocumentModel {
       counters[index] = (counters[index] ?? 0) + 1;
       if (patterns.some(pattern => pattern.test(source))) {
         warn('有标题编号形式与 # 层级不一致，已保留原编号，请核对层级。');
-        for (let lower = index + 1; lower < 4; lower++) counters[lower] = undefined;
         return runs;
       }
     }
-    for (let lower = index + 1; lower < 4; lower++) counters[lower] = undefined;
     if (matched) return runs;
     const n = counters[index]!;
     const prefix = index === 0 ? `${chineseNumber(n)}、` : index === 1 ? `（${chineseNumber(n)}）` : index === 2 ? `${n}. ` : `（${n}）`;

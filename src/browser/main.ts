@@ -228,8 +228,9 @@ element('detect-fonts').addEventListener('click', async () => {
   } catch { status.textContent = '未取得字体访问权限，可手动填写字体名称，不影响导出。'; }
 });
 async function importMarkdown(file: File): Promise<void> {
-  if (!/\.(md|markdown|txt)$/i.test(file.name)) { message('请选择 .md、.markdown 或 .txt 文件。', true); return; }
+  // Every new file choice supersedes earlier reads, even when the new file is rejected.
   const token = ++readToken;
+  if (!/\.(md|markdown|txt)$/i.test(file.name)) { message('请选择 .md、.markdown 或 .txt 文件。', true); return; }
   try {
     const bytes = await file.arrayBuffer();
     const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);

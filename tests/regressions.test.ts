@@ -30,6 +30,21 @@ describe('1.0.1 Markdown regressions', () => {
   it('resets all counters on a new main title, including numbered children', () => {
     expect(paragraphs('# 第一部分\n\n## 第一节\n\n### 子节\n\n# 第二部分\n\n## 新节\n\n### 子节')).toEqual(['第一部分', '一、第一节', '（一）子节', '第二部分', '一、新节', '（一）子节']);
   });
+  it.each([
+    { name: 'Chinese first-level parent', before: '## 一、父\n\n### 旧子', parent: `## ${'一'.repeat(17)}、超限父`, child: '### 新子', expected: '（一）新子' },
+    { name: 'Chinese second-level parent', before: '## 一、上级\n\n### （一）父\n\n#### 1. 旧子', parent: `### （${'一'.repeat(17)}）超限父`, child: '#### 新子', expected: '1. 新子' },
+    { name: 'Arabic third-level parent', before: '## 一、上级\n\n### （一）中层\n\n#### 1. 父\n\n##### （1）旧子', parent: '#### 999999999999999999. 超限父', child: '##### 新子', expected: '（1）新子' },
+  ])('resets descendants before returning from an oversized $name', async ({ before, parent, child, expected }) => {
+    const model = parseDocument(`${before}\n\n${parent}\n\n${child}`);
+    const text = model.blocks.filter(block => block.kind !== 'table').map(block => inlineText(block.runs));
+    expect(text.at(-1)).toBe(expected);
+    expect(text).toContain(parent.replace(/^#+\s+/u, ''));
+    expect(model.warnings.some(warning => warning.includes('超出可处理范围'))).toBe(true);
+    const xml = strFromU8(unzipSync(await generateWord(model, defaultSettings()))['word/document.xml']);
+    const lastParagraph = (xml.match(/<w:p\b[^>]*>[\s\S]*?<\/w:p>/g) ?? []).at(-1) ?? '';
+    const wordText = [...lastParagraph.matchAll(/<w:t\b[^>]*>([\s\S]*?)<\/w:t>/g)].map(match => match[1]).join('');
+    expect(wordText).toBe(expected);
+  });
   it.each(['二〇二五', '二零二五', '二千零二十五'])('continues authored Chinese number %s correctly', number => {
     expect(paragraphs(`## ${number}、计划\n\n## 后续`)).toEqual([`${number}、计划`, '二千零二十六、后续']);
   });
