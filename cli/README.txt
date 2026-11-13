@@ -27,4 +27,4 @@ Profiles live at the tool root .local/profiles.json, independent of the working 
 The converter makes no model API calls. AI Skill loading and tool calls have their own context costs.
 
 完整帮助 / Help: node ./cli/md2word.mjs --help
-中文 / English docs: https://github.com/BBS6215/md2word-local
+中文 / English docs: https://github.com/BBS6215/lighter-md-to-word

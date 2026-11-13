@@ -8,7 +8,7 @@ A self-contained HTML app of about **0.67 MB**: download, double-click, paste Ma
 
 The browser interface currently uses Chinese labels; this guide documents both entry points in English.
 
-**[Download HTML](https://github.com/BBS6215/md2word-local/raw/refs/heads/main/md2word.html)** · **[Download portable CLI](https://github.com/BBS6215/md2word-local/raw/refs/heads/main/downloads/lighter-md-to-word-cli.zip)** · [AI integration guide (Chinese)](./docs/skill-integration.md)
+**[Download HTML](https://github.com/BBS6215/lighter-md-to-word/raw/refs/heads/main/md2word.html)** · **[Download portable CLI](https://github.com/BBS6215/lighter-md-to-word/raw/refs/heads/main/downloads/lighter-md-to-word-cli.zip)** · [AI integration guide (Chinese)](./docs/skill-integration.md)
 
 ![Lighter Markdown editor and Word preview](./docs/images/lighter-desktop.png)
 
@@ -19,7 +19,7 @@ The browser interface currently uses Chinese labels; this guide documents both e
 | Paste / import / preview / export | Only `md2word.html`, ~0.67 MB | Desktop Chrome or Edge; no Node.js, Git, or installer |
 | Local AI / Skill / automation | CLI ZIP includes `cli/md2word.mjs`, `md2word.cmd`, a bilingual quick start, and licenses | **Node.js 22.12+**; no pnpm, npm install, or build step |
 
-Version **1.1.0**. The product name is **Lighter · MD to Word**. Repository and command names remain `md2word-local` / `md2word` for compatibility. Development `node_modules` are not distributed.
+Version **1.1.0**. The product name is **Lighter · MD to Word**. The repository and local project directory are named `lighter-md-to-word`; HTML filenames and the `md2word` command remain compatible. Development `node_modules` are not distributed.
 
 ## Start in three steps
 

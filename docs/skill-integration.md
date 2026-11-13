@@ -22,8 +22,8 @@
 ## PowerShell 示例
 
 ```powershell
-& "D:\Tools\md2word-local\md2word.cmd" profiles list
-& "D:\Tools\md2word-local\md2word.cmd" convert --input "D:\Documents\final.md" --profile default
+& "D:\Tools\lighter-md-to-word\md2word.cmd" profiles list
+& "D:\Tools\lighter-md-to-word\md2word.cmd" convert --input "D:\Documents\final.md" --profile default
 ```
 
 以上路径是通用示例，请使用真实安装路径。开发环境要求和完整命令见 README。本仓库提供接入规范，不自动修改全局配置或既有 Skill，也不要求安装 MCP。
@@ -37,7 +37,7 @@
 ```markdown
 ---
 name: md2word
-description: 将已有最终 Markdown 通过本机 md2word-local 导出固定格式 Word；不承担材料撰写、Word 编辑或复杂模板处理。
+description: 将已有最终 Markdown 通过本机 Lighter · MD to Word 导出固定格式 Word；不承担材料撰写、Word 编辑或复杂模板处理。
 ---
 
 使用当前会话明确的最终 MD；不为转换重新生成或发送正文。文件有歧义时询问。

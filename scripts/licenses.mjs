@@ -30,5 +30,5 @@ export async function runtimeLicenses(root) {
   }
   const project = JSON.parse(await readFile(join(root, 'package.json'), 'utf8'));
   for (const name of Object.keys(project.dependencies).sort()) await visit(name, root);
-  return 'Runtime dependency license notices for md2word-local\n\n' + [...found.keys()].sort().map(key => found.get(key)).join('\n\n' + '='.repeat(72) + '\n\n') + '\n';
+  return 'Runtime dependency license notices for Lighter - MD to Word\n\n' + [...found.keys()].sort().map(key => found.get(key)).join('\n\n' + '='.repeat(72) + '\n\n') + '\n';
 }

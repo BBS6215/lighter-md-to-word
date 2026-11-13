@@ -1,5 +1,15 @@
 # 验证记录
 
+## 仓库与本机目录统一更名补验
+
+日期：2026-11-13。GitHub 仓库改为 BBS6215/lighter-md-to-word，本机项目目录同步改为 lighter-md-to-word；版本仍为 1.1.0。仓库 ID、提交历史、公开状态及原有项目文件保留，origin 指向新地址。
+
+- 更新双语 README、AI 接入示例、CLI 包内说明和下载链接。项目包名及许可说明抬头同步更新；HTML 文件名和 md2word 命令不变，Word 排版、配置 schema 和参数不变。
+- Windows pnpm 依赖入口使用绝对 Junction，目录改名后按原锁文件离线重建链接；没有升级依赖。新路径下 `pnpm check` 通过：45 项核心/CLI、29 项浏览器，共 74 项。
+- 本机共享 md2word Skill 改指新目录中的预打包 CLI；元数据校验和对应 L2 共享门禁通过。双端实际发现检查通过；按 Skill 文件中声明的程序路径转换合成 MD 成功，Windows 包装器也可从其他目录调用，CLI 默认个人配置定位于新项目根目录。
+- GitHub Desktop 使用 Locate 更新原有登记，实际界面显示 Current repository lighter-md-to-word；保留原仓库记录，未新建或重复克隆仓库。
+- 同步更新公开 HTML / CLI 成品与会话交付副本，核对构建一致性及新地址下载；最终提交与 CI 状态以实际运行记录为准。
+
 ## 1.1.0 品牌、双语说明与 CLI 分发补验
 
 日期：2026-11-13。沿用 1.1.0 版本与 Word 排版规则，产品显示名改为 Lighter · MD to Word；仓库地址、本机目录、配置键、CLI 参数及既有 build/cli.js 入口保持兼容。

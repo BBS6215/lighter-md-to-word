@@ -32684,7 +32684,7 @@ main().catch((error) => {
   process.exitCode = 1;
 });
 /*
-Runtime dependency license notices for md2word-local
+Runtime dependency license notices for Lighter - MD to Word
 
 @types/debug@4.1.13 (MIT)
     MIT License

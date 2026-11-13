@@ -68,6 +68,6 @@ Word 输出以 wx 独占创建，重名递增后缀；失败时只删除本次�
 
 执行 `pnpm check` 时先类型检查和构建，再运行包含真实 CLI 的核心集成测试与浏览器检查。回归需覆盖失败恢复、异步交错、生成包中所有 XML/关系文件的严格解析，不能仅验证正常点击路径。
 
-产品显示名称为 Lighter · MD to Word；仓库、本机目录、CLI 短命令及配置键保持兼容。README.md 与 README.en.md 分别提供中文和英文入口。字体与编号支持公文材料常用排法，但当前自定义默认值并非完整 GB/T 9704—2012 模板；不因宣传而修改既有配置或 Word 样式。
+产品显示名称为 Lighter · MD to Word；仓库与本机目录统一为 lighter-md-to-word，CLI 短命令、HTML 文件名及配置键保持兼容。README.md 与 README.en.md 分别提供中文和英文入口。字体与编号支持公文材料常用排法，但当前自定义默认值并非完整 GB/T 9704—2012 模板；不因宣传而修改既有配置或 Word 样式。
 
 `downloads/lighter-md-to-word-cli.zip` 由同一构建生成，包含 CLI、Windows 包装器、双语快速说明及许可，不含 Node.js、开发依赖、个人配置和源材料。文本换行及 ZIP 文件时间固定以跨平台重建核对，CI 同时检查 JS 与 ZIP 成品。

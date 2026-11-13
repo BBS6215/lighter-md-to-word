@@ -6,7 +6,7 @@
 
 单文件约 **0.67 MB**，下载后双击即用。离线转换、正文不上传、最多三套排版配置。另提供预打包 CLI（下载包约 **0.27 MB**，解压后入口约 1.25 MB），供本地 AI、Skill 和脚本直接调用。
 
-**[下载 HTML](https://github.com/BBS6215/md2word-local/raw/refs/heads/main/md2word.html)** · **[下载 CLI 便携包](https://github.com/BBS6215/md2word-local/raw/refs/heads/main/downloads/lighter-md-to-word-cli.zip)** · [AI 接入说明](./docs/skill-integration.md)
+**[下载 HTML](https://github.com/BBS6215/lighter-md-to-word/raw/refs/heads/main/md2word.html)** · **[下载 CLI 便携包](https://github.com/BBS6215/lighter-md-to-word/raw/refs/heads/main/downloads/lighter-md-to-word-cli.zip)** · [AI 接入说明](./docs/skill-integration.md)
 
 ![Lighter 的 Markdown 编辑与 Word 内容预览](./docs/images/lighter-desktop.png)
 
@@ -17,7 +17,7 @@
 | 手动粘贴、拖入、预览、导出 | 一个 `md2word.html`，约 0.67 MB | 桌面 Chrome / Edge；无需 Node.js、Git 或安装程序 |
 | 本地 AI / Skill / 脚本调用 | CLI ZIP 内有 `cli/md2word.mjs`、`md2word.cmd`、双语快速说明和许可文件 | Node.js **22.12 或更新版本**；无需 pnpm、`npm install` 或自行构建 |
 
-当前版本 **1.1.0**。对外名称为 **Lighter · MD to Word**；仓库、文件名和短命令继续使用 `md2word-local` / `md2word`，保持现有调用兼容。开发目录里的 `node_modules` 不随下载分发。
+当前版本 **1.1.0**。对外名称为 **Lighter · MD to Word**；仓库与本机项目目录统一为 `lighter-md-to-word`；HTML 文件名和短命令继续使用 `md2word`，保持现有调用兼容。开发目录里的 `node_modules` 不随下载分发。
 
 ## 普通使用：下载 → 双击 → 导出
 
