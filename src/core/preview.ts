@@ -28,8 +28,9 @@ export function renderPreview(model: DocumentModel, settings: FormatSettings): s
   return model.blocks.map(block => {
     const key = blockStyleKey(block), style = settings.styles[key];
     const indent = contextIndent(block, widthPt);
+    const source = block.source ? ` data-source-start="${block.source.start}" data-source-end="${block.source.end}"` : '';
     if (block.kind === 'table') {
-      return `<div class="preview-table" style="margin-left:${indent}pt"><table>${block.rows.map((row, i) => `<tr>${row.map((cell, column) => {
+      return `<div class="preview-table"${source} style="margin-left:${indent}pt"><table>${block.rows.map((row, i) => `<tr>${row.map((cell, column) => {
         const tag = i === 0 ? 'th' : 'td';
         return `<${tag} style="text-align:${block.align[column] || 'left'}">${inlineHtml(cell, false)}</${tag}>`;
       }).join('')}</tr>`).join('')}</table></div>`;
@@ -41,6 +42,6 @@ export function renderPreview(model: DocumentModel, settings: FormatSettings): s
     const tag = block.kind === 'heading' ? `h${Math.min((block.level ?? 0) + 1, 6)}` : block.kind === 'code' ? 'pre' : 'p';
     const firstIndent = block.depth || block.quote || block.kind === 'code' ? 0 : style.indentChars;
     const css = `font-family:${cssFont(style.font)},serif;font-size:${style.size}pt;font-weight:${style.bold ? 700 : 400};line-height:${settings.paragraph.line}pt;text-align:${block.kind === 'code' ? 'left' : style.alignment};text-indent:${firstIndent}em;margin:${settings.paragraph.before}pt 0 ${settings.paragraph.after}pt ${indent}pt;`;
-    return `<${tag} style="${escapeHtml(css)}">${escapeHtml(marker)}${inlineHtml(block.runs, block.kind === 'heading') || '<br>'}</${tag}>`;
+    return `<${tag}${source} style="${escapeHtml(css)}">${escapeHtml(marker)}${inlineHtml(block.runs, block.kind === 'heading') || '<br>'}</${tag}>`;
   }).join('');
 }

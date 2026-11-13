@@ -6,6 +6,7 @@ import { escapeHtml, renderPreview } from '../core/preview';
 import { generateWord } from '../core/word';
 import { loadPreferences, savePreferences } from './persistence';
 import { version } from '../../package.json';
+import { ScrollSync } from './scroll-sync';
 
 function element<T extends HTMLElement>(id: string): T { return document.getElementById(id) as T; }
 const editor = element<HTMLTextAreaElement>('markdown');
@@ -13,6 +14,7 @@ const picker = element<HTMLSelectElement>('profile-select');
 const filename = element<HTMLInputElement>('filename');
 const exportButton = element<HTMLButtonElement>('export-word');
 const dialog = element<HTMLDialogElement>('settings-dialog');
+const scrollSync = new ScrollSync(editor, element('preview-viewport'), element('paper'));
 const unavailableStorage = { getItem() { throw new Error('Storage unavailable'); }, setItem() { throw new Error('Storage unavailable'); } };
 let storage: Storage;
 try { storage = window.localStorage; } catch { storage = unavailableStorage as unknown as Storage; }
@@ -21,6 +23,7 @@ let store: ProfileStore = loaded.store, selected = loaded.selected;
 let model: DocumentModel | null = parseDocument('');
 let manualName: string | undefined, importedStem: string | undefined;
 let formInvalid = false, exporting = false, parseError: string | undefined;
+let messageToken = 0, messageTimer: ReturnType<typeof setTimeout> | undefined;
 let documentRevision = 0, profileImportToken = 0;
 let undoSnapshot: { text: string; manualName?: string; importedStem?: string } | null = null;
 let undoTimer: ReturnType<typeof setTimeout> | undefined;
@@ -29,8 +32,11 @@ const styleLabels = { title: '大标题', h1: '一级标题', h2: '二级标题'
 const commonFonts = ['方正小标宋简体', '仿宋_GB2312', '楷体_GB2312', '黑体', '宋体', '仿宋', '楷体', '微软雅黑', 'Times New Roman', 'Arial'];
 let fontNames = [...commonFonts];
 function current() { return selectProfile(store, selected); }
-function message(text: string, error = false): void {
+function message(text: string, error = false, transient = true): void {
+  const token = ++messageToken;
+  if (messageTimer) clearTimeout(messageTimer);
   const box = element('app-message'); box.textContent = text; box.className = `message${error ? ' error' : ''}`; box.hidden = !text;
+  if (text && !error && transient) messageTimer = setTimeout(() => { if (token === messageToken) { box.hidden = true; box.textContent = ''; } }, 4500);
 }
 function settingsError(text: string): void {
   const box = element('settings-error'); box.textContent = text; box.hidden = !text;
@@ -60,7 +66,7 @@ function paintPreview(): void {
   const settings = current().settings;
   const paper = element('paper'), empty = element('preview-empty');
   paper.hidden = !model || !editor.value.trim(); empty.hidden = !paper.hidden;
-  empty.querySelector('h3')!.textContent = parseError ? '当前正文无法预览' : editor.value.trim() ? '正在更新预览…' : '你的文稿，会在这里成形';
+  empty.querySelector('h3')!.textContent = parseError ? '当前正文无法预览' : editor.value.trim() ? '正在更新预览…' : '粘贴或拖入最终稿';
   paper.style.padding = `${settings.margins.top}cm ${settings.margins.right}cm ${settings.margins.bottom}cm ${settings.margins.left}cm`;
   const content = element('preview-content');
   content.style.fontFamily = `"${settings.styles.body.font.replace(/[\\"]/g, '\\$&')}", serif`;
@@ -73,7 +79,10 @@ function paintPreview(): void {
   element('profile-caption').textContent = current().name;
   const warnings = element('conversion-warnings');
   warnings.hidden = !model?.warnings.length;
-  warnings.innerHTML = model?.warnings.length ? `<strong>转换提示</strong><ul>${model.warnings.map(warning => `<li>${escapeHtml(warning)}</li>`).join('')}</ul>` : '';
+  const warningsOpen = warnings.querySelector('details')?.open ?? false;
+  warnings.innerHTML = model?.warnings.length ? `<details${warningsOpen ? ' open' : ''}><summary>转换提示 · ${model.warnings.length} 项</summary><ul>${model.warnings.map(warning => `<li>${escapeHtml(warning)}</li>`).join('')}</ul></details>` : '';
+  fitPaper();
+  scrollSync.update(model, editor.value);
   updateExportState();
 }
 function parseNow(): DocumentModel | null {
@@ -231,12 +240,14 @@ async function importMarkdown(file: File): Promise<void> {
   // Every new file choice supersedes earlier reads, even when the new file is rejected.
   const token = ++readToken;
   if (!/\.(md|markdown|txt)$/i.test(file.name)) { message('请选择 .md、.markdown 或 .txt 文件。', true); return; }
+  message('正在读取文件…', false, false);
   try {
     const bytes = await file.arrayBuffer();
     const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
     if (token !== readToken) return;
     forgetUndo(); editor.value = text; manualName = undefined; importedStem = file.name.replace(/\.[^.]+$/, '');
     documentChanged();
+    scrollSync.reset();
     if (parseNow()) message('文件已导入。请核对预览后导出 Word。');
   } catch { if (token === readToken) message('文件读取失败，请确认文件为 UTF-8 编码。原文未被替换。', true); }
 }
@@ -244,16 +255,25 @@ element('import-markdown').addEventListener('click', () => element<HTMLInputElem
 element<HTMLInputElement>('markdown-file').addEventListener('change', event => {
   const input = event.target as HTMLInputElement, file = input.files?.[0]; input.value = ''; if (file) void importMarkdown(file);
 });
+let dragDepth = 0;
+function showDrop(active: boolean): void {
+  element('drop-hint').hidden = !active; element('workspace').classList.toggle('drop-active', active);
+}
+document.addEventListener('dragenter', event => { if (event.dataTransfer?.types.includes('Files')) { event.preventDefault(); dragDepth++; showDrop(true); } });
+document.addEventListener('dragleave', event => { if (event.dataTransfer?.types.includes('Files') && --dragDepth <= 0) { dragDepth = 0; showDrop(false); } });
+window.addEventListener('blur', () => { dragDepth = 0; showDrop(false); });
+document.addEventListener('dragend', () => { dragDepth = 0; showDrop(false); });
 for (const eventName of ['dragover', 'drop']) document.addEventListener(eventName, event => {
   const drag = event as DragEvent;
   if (!drag.dataTransfer?.types.includes('Files')) return;
   event.preventDefault();
-  if (eventName === 'drop') { const file = drag.dataTransfer.files[0]; if (file) void importMarkdown(file); }
+  if (eventName === 'drop') { dragDepth = 0; showDrop(false); const file = drag.dataTransfer.files[0]; if (file) void importMarkdown(file); }
 });
 element('clear-button').addEventListener('click', () => {
   if (!editor.value) return;
   forgetUndo(); undoSnapshot = { text: editor.value, manualName, importedStem };
   editor.value = ''; manualName = undefined; importedStem = undefined; documentChanged();
+  scrollSync.reset();
   parseNow(); editor.focus(); element('undo-toast').hidden = false;
   undoTimer = setTimeout(forgetUndo, 6000);
 });
@@ -272,15 +292,33 @@ exportButton.addEventListener('click', async () => {
     model: parsed, settings: structuredClone(current().settings), revision: documentRevision,
     name: wordFilename(manualName, parsed.title, importedStem),
   };
-  exporting = true; updateExportState(); exportButton.textContent = '正在生成…';
+  const statusAtStart = messageToken;
+  const mayReport = () => !parseError && (statusAtStart === messageToken || !element('app-message').classList.contains('error'));
+  exporting = true; updateExportState();
+  const loadingTimer = setTimeout(() => { if (exporting) exportButton.textContent = '正在生成…'; }, 200);
   try {
     const bytes = await generateWord(snapshot.model, snapshot.settings);
     download(new Uint8Array(bytes).buffer, 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', snapshot.name);
-    if (!parseError) message(`${snapshot.name} 已生成并发起下载。${snapshot.revision !== documentRevision ? '页面正文已发生变化，本次下载使用点击导出时的内容。' : '请在下载目录查看；当前正文仍保留在页面。'}`);
-  } catch (error) { if (!parseError) message(error instanceof Error ? error.message : '生成失败，请重试。', true); }
-  finally { exporting = false; exportButton.innerHTML = '导出 Word <span aria-hidden="true">↗</span>'; updateExportState(); }
+    if (mayReport()) message(`${snapshot.name} 已生成并发起下载。${snapshot.revision !== documentRevision ? '页面正文已发生变化，本次下载使用点击导出时的内容。' : '请在下载目录查看；当前正文仍保留在页面。'}`);
+  } catch (error) { if (mayReport()) message(error instanceof Error ? error.message : '生成失败，请重试。', true); }
+  finally { clearTimeout(loadingTimer); exporting = false; exportButton.textContent = '导出 Word'; updateExportState(); }
 });
 document.addEventListener('keydown', event => { if ((event.ctrlKey || event.metaKey) && event.key === 'Enter' && !dialog.open) { event.preventDefault(); exportButton.click(); } });
+const syncToggle = element<HTMLButtonElement>('sync-scroll'), syncKey = 'md2word.sync-scroll.v1';
+let syncEnabled = true;
+try { syncEnabled = storage.getItem(syncKey) !== 'false'; } catch { /* UI preference is optional. */ }
+syncToggle.setAttribute('aria-pressed', String(syncEnabled)); scrollSync.setEnabled(syncEnabled);
+syncToggle.addEventListener('click', () => {
+  syncEnabled = !syncEnabled; syncToggle.setAttribute('aria-pressed', String(syncEnabled)); scrollSync.setEnabled(syncEnabled);
+  try { storage.setItem(syncKey, String(syncEnabled)); } catch { /* Conversion remains available. */ }
+});
+function fitPaper(): void {
+  const paper = element('paper'), viewport = element('preview-viewport');
+  if (paper.hidden || !paper.offsetWidth) return;
+  const style = getComputedStyle(viewport), available = viewport.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+  paper.style.zoom = String(Math.min(1, Math.max(0.1, available / paper.offsetWidth)));
+}
+new ResizeObserver(() => { fitPaper(); scrollSync.update(model, editor.value); }).observe(element('preview-viewport'));
 refreshProfiles(); renderFontList(); renderSettings(); paintPreview();
 element('version-label').textContent = `v${version}`;
 if (loaded.error) { element('storage-status').textContent = loaded.error; element('storage-status').classList.add('storage-error'); }

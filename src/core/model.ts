@@ -7,8 +7,10 @@ import { assertXmlText } from './xml-text';
 export interface Inline { text: string; bold?: boolean; italic?: boolean; strike?: boolean; code?: boolean; href?: string; break?: boolean }
 export interface Marker { kind: 'bullet' | 'number' | 'task'; depth: number; number?: number; checked?: boolean }
 export interface Context { depth: number; quote: number; marker?: Marker }
-export interface ParagraphBlock extends Context { kind: 'paragraph' | 'heading' | 'code'; runs: Inline[]; level?: number }
-export interface TableBlock extends Context { kind: 'table'; rows: Inline[][][]; align: ('left' | 'right' | 'center' | null)[] }
+/** UTF-16 offsets in the exact string passed to parseDocument; never persisted. */
+export interface SourceRange { start: number; end: number }
+export interface ParagraphBlock extends Context { kind: 'paragraph' | 'heading' | 'code'; runs: Inline[]; level?: number; source?: SourceRange }
+export interface TableBlock extends Context { kind: 'table'; rows: Inline[][][]; align: ('left' | 'right' | 'center' | null)[]; source?: SourceRange }
 export type Block = ParagraphBlock | TableBlock;
 export interface DocumentModel {
   blocks: Block[]; title: string; warnings: string[];
@@ -78,7 +80,13 @@ function collectDefinitions(root: Root): Map<string, Definition> {
 export function parseDocument(markdown: string): DocumentModel {
   assertXmlText(markdown, '正文');
   const root = parser.parse(markdown.replace(/^\uFEFF/u, '')) as Root;
+  const bomOffset = markdown.startsWith('\uFEFF') ? 1 : 0;
   const blocks: Block[] = [], warnings = new Set<string>();
+  function append(block: Block, node: { position?: RootContent['position'] }): void {
+    const start = node.position?.start.offset, end = node.position?.end.offset;
+    if (start !== undefined && end !== undefined) block.source = { start: start + bomOffset, end: end + bomOffset };
+    blocks.push(block);
+  }
   const definitions = collectDefinitions(root);
   const counters: (number | undefined)[] = [undefined, undefined, undefined, undefined];
   let title = '', titles = 0, removedBreaks = 0;
@@ -166,7 +174,7 @@ export function parseDocument(markdown: string): DocumentModel {
         convert(child, { depth, quote: context.quote, ...(first ? { marker } : {}) });
         if (blocks.length > previous) first = false;
       }
-      if (first) blocks.push({ kind: 'paragraph', runs: [], depth, quote: context.quote, marker });
+      if (first) append({ kind: 'paragraph', runs: [], depth, quote: context.quote, marker }, item);
       index++;
     }
   }
@@ -175,9 +183,9 @@ export function parseDocument(markdown: string): DocumentModel {
       case 'heading': {
         const level = Math.min(node.depth - 1, 4);
         if (node.depth > 5) warn('###### 超过四级标题范围，已按第四级标题排版。');
-        blocks.push({ kind: 'heading', level, runs: heading(node.children.flatMap(child => inlines(child)), level), ...context }); break;
+        append({ kind: 'heading', level, runs: heading(node.children.flatMap(child => inlines(child)), level), ...context }, node); break;
       }
-      case 'paragraph': blocks.push({ kind: 'paragraph', runs: node.children.flatMap(child => inlines(child)), ...context }); break;
+      case 'paragraph': append({ kind: 'paragraph', runs: node.children.flatMap(child => inlines(child)), ...context }, node); break;
       case 'list': convertList(node, context); break;
       case 'blockquote': {
         let first = true;
@@ -190,16 +198,16 @@ export function parseDocument(markdown: string): DocumentModel {
       }
       case 'table':
         if (context.marker) blocks.push({ kind: 'paragraph', runs: [], ...context });
-        blocks.push({ kind: 'table', rows: node.children.map(row => row.children.map(cell => cell.children.flatMap(child => inlines(child)))), align: node.align ?? [], depth: context.depth, quote: context.quote }); break;
-      case 'code': blocks.push({ kind: 'code', runs: node.value.split(/\r?\n/u).flatMap((line, i) => [...(i ? [{ text: '', break: true } as Inline] : []), { text: line }]), ...context }); break;
+        append({ kind: 'table', rows: node.children.map(row => row.children.map(cell => cell.children.flatMap(child => inlines(child)))), align: node.align ?? [], depth: context.depth, quote: context.quote }, node); break;
+      case 'code': append({ kind: 'code', runs: node.value.split(/\r?\n/u).flatMap((line, i) => [...(i ? [{ text: '', break: true } as Inline] : []), { text: line }]), ...context }, node); break;
       case 'html':
         if (/^(?:<br\s*\/?>\s*)+$/iu.test(node.value.trim())) {
           const count = node.value.match(/<br\s*\/?>/giu)!.length;
-          for (let i = 0; i < count; i++) blocks.push({ kind: 'paragraph', runs: [], ...context, marker: i === 0 ? context.marker : undefined });
+          for (let i = 0; i < count; i++) append({ kind: 'paragraph', runs: [], ...context, marker: i === 0 ? context.marker : undefined }, node);
           break;
         }
         warn('块级 HTML 未执行，已按原文保留；复杂 HTML 表格暂不转换。');
-        blocks.push({ kind: 'code', runs: [{ text: node.value }], ...context }); break;
+        append({ kind: 'code', runs: [{ text: node.value }], ...context }, node); break;
       case 'footnoteDefinition':
         warn('脚注以标记及正文形式保留，不生成 Word 原生脚注。');
         blocks.push({ kind: 'paragraph', runs: [{ text: `[注：${node.label || node.identifier}]` }], ...context });
