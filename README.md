@@ -1,33 +1,43 @@
-# MD → Word · 离线排版工具
+# Lighter · MD to Word
 
-把 AI 生成的 Markdown 最终稿，转换为符合固定格式、可以继续编辑的 Word。**普通使用者只需要一个 HTML 文件。**
+**一个 HTML，把 Markdown 变成可编辑的 Word。**
 
-当前版本：**1.1.0**。增加双栏同段同步滚动，更新蓝色界面、内嵌 MD 图标、自适应 A4 预览和操作反馈，并补充快捷 Skill 接入说明。保留原有 Word 排版规则及既有修复；合法配置仍使用 `schemaVersion: 1`，无需重建。
+[中文](./README.md) · [English](./README.en.md)
 
-- **网页 AI 内容**：复制、粘贴，或导入 `.md/.markdown/.txt`，选配置后导出 `.docx`。
-- **本地 AI / Skill**：最终 MD 落盘后，只传文件路径给 CLI；转换器不调用大模型，也不要求模型再次发送整篇正文。
-- **最多三套配置**：一套默认、两套自定义，可调整字体、字号、段落、页边距和页码。
-- **离线、无账号**：无转换服务器、无上传、无统计上报、无正文历史；首版不需要 MCP。
+单文件约 **0.67 MB**，下载后双击即用。离线转换、正文不上传、最多三套排版配置。另提供预打包 CLI（下载包约 **0.27 MB**，解压后入口约 1.25 MB），供本地 AI、Skill 和脚本直接调用。
 
-## 直接使用：无需安装
+**[下载 HTML](https://github.com/BBS6215/md2word-local/raw/refs/heads/main/md2word.html)** · **[下载 CLI 便携包](https://github.com/BBS6215/md2word-local/raw/refs/heads/main/downloads/lighter-md-to-word-cli.zip)** · [AI 接入说明](./docs/skill-integration.md)
 
-1. [下载仓库 ZIP](https://github.com/BBS6215/md2word-local/archive/refs/heads/main.zip)，解压。
-2. 双击根目录的 **`md2word.html`**，推荐桌面版 Chrome 或 Edge。
-3. 粘贴或导入最终稿，核对预览，点击“导出 Word”。也支持 `Ctrl+Enter`。
+![Lighter 的 Markdown 编辑与 Word 内容预览](./docs/images/lighter-desktop.png)
 
-分享给同事时，只发送 `md2word.html` 即可；他们不需要 Node.js、Git 或其他依赖。也可以打开 [HTML 文件](./md2word.html)，使用 GitHub 的“Download raw file”下载，不能把 GitHub 文件查看页面直接当作工具运行。
+## 两种入口，同一套排版
 
-正文在导出后仍保留在页面；清除、替换或关闭后不由工具留存，刷新后清空。清除后 6 秒内可撤销；输入新内容后旧稿撤销失效。
+| 使用方式 | 拿到什么 | 需要什么 |
+|---|---|---|
+| 手动粘贴、拖入、预览、导出 | 一个 `md2word.html`，约 0.67 MB | 桌面 Chrome / Edge；无需 Node.js、Git 或安装程序 |
+| 本地 AI / Skill / 脚本调用 | CLI ZIP 内有 `cli/md2word.mjs`、`md2word.cmd`、双语快速说明和许可文件 | Node.js **22.12 或更新版本**；无需 pnpm、`npm install` 或自行构建 |
 
-桌面双栏默认开启“同步滚动”：滚动原文或预览时，另一侧尽量跟随同段内容。可点击关闭；手机等单栏布局自动暂停联动，回到双栏后沿用开关偏好。长段落、表格和代码块内部为近似跟随，不承诺逐行或与 Word 分页一致。导入新文件、清空正文时回到顶部。
+当前版本 **1.1.0**。对外名称为 **Lighter · MD to Word**；仓库、文件名和短命令继续使用 `md2word-local` / `md2word`，保持现有调用兼容。开发目录里的 `node_modules` 不随下载分发。
 
-预览纸张随面板宽度自动缩放；“近似排版”可点击或用键盘展开说明。拖入文件时有松手提示；成功消息短暂显示，错误保留至后续处理。导出只报告“已生成并发起下载”，请在浏览器下载目录核对实际文件。
+## 普通使用：下载 → 双击 → 导出
 
-生成期间可以继续编辑；每次下载固定使用点击导出时的正文、配置和文件名。解析失败会清除旧预览并阻止导出，原文保留供修改。文件名按“手动名称 → 大标题 → 导入文件主名 → document”选择有效值，统一处理扩展名和 Windows 保留名称。
+1. 点击上方“下载 HTML”，保存为 `md2word.html`。若浏览器只显示源码，使用“另存为”保存文件。
+2. 双击打开，粘贴 Markdown，或导入 / 拖入 UTF-8 的 `.md`、`.markdown`、`.txt`。
+3. 选择排版配置，核对预览，点击“导出 Word”；也支持 `Ctrl+Enter`。
 
-新选择或拖入的文件即使格式不支持，也会使较早的读取失效，保留当前正文及本次错误提示。超限手写标题编号保留原号并提示，下级编号仍重新开始。
+分享给朋友时，**只发这个 HTML 即可**。图标、脚本、样式和依赖许可均在文件内，无需联网加载资源。
 
-## 默认排版
+桌面原文与预览可双向跟随同段内容；手机等单栏布局自动暂停同步。预览适应面板宽度，长段落、表格和代码块内部为近似跟随，最终分页以 Word / WPS 为准。
+
+正文在当前页面内存中保留，刷新或关闭后清空，不写入历史记录；清除后 6 秒内可撤销，输入新内容后旧稿撤销失效。源 Markdown 不被改写。字体文件不内嵌，接收电脑缺少所选字体时可能替换。
+
+## 中文公文材料排版
+
+支持公文材料常用的标题、正文、层级编号、首行缩进、固定行距和页码；字体及层级处理参考 **GB/T 9704—2012《党政机关公文格式》**中的相关做法。[国家标准官方信息](https://openstd.samr.gov.cn/bzgk/std/newGbInfo?hcno=F3CC9BEF482524C895FDA7A08BB4A70E)
+
+**这是一套可自定义的公文材料排版工具，当前默认配置并非完整的国标公文模板。**例如本工具默认上边距 25.4 mm、左边距 31.75 mm、居中数字页码；标准版心与页码另有规定。工具不自动编排红头、发文字号、印章、版记或印制装订，也不保证每页 22 行、每行 28 字。正式发文应按本单位模板及相应要求核对。[公文版式要求参考](https://www.zyx.gov.cn/Content-1778525.html)
+
+### 当前默认配置
 
 | 项目 | 默认值 |
 |---|---|
@@ -37,128 +47,83 @@
 | 二级标题 | 楷体_GB2312，三号，加粗 |
 | 三级、四级标题 | 仿宋_GB2312，三号，均加粗 |
 | 正文 | 仿宋_GB2312，三号，两端对齐 |
-| 段落 | 大标题、一级至四级标题及正文固定行距 28 磅，段前段后 0 |
-| 缩进 | 正文、一级至四级标题首行缩进 2 字符 |
+| 段落 | 固定行距 28 磅，段前段后 0；正文及各级标题首行缩进 2 字符，大标题不缩进 |
 | 页码 | 居中阿拉伯数字，从 1 开始，9 磅 |
 
-Markdown 层级对应：
+`#` 为大标题；`##`、`###`、`####`、`#####` 分别对应“一、”“（一）”“1.”“（1）”。缺少编号时补齐，已有编号保留并参与计数，上级变化后下级重新开始；异常顺序提示核对，不改写材料内容。
 
-```markdown
-# 文档大标题
-## 一级标题       → 一、
-### 二级标题      → （一）
-#### 三级标题     → 1.
-##### 四级标题    → （1）
-```
+## 保存三套配置 / 交给 AI
 
-缺少编号时补齐；已有编号保留并参与计数，上级变化时下级重新计数。遇到跳级、重复或不连续时提示核对，不擅自重写原文。标题加粗以配置为准，正文中的 Markdown 强调会保留。
+默认配置可调整、恢复，不可删除；另可创建两套命名配置。合法设置自动尝试保存在当前浏览器。正文、文件名和转换历史不进入配置；同步开关也是独立的 UI 偏好。
 
-## 三套配置如何保存
+移动 HTML、清理浏览器数据或换浏览器可能影响本地配置，建议导出 JSON 备份。存储不可用时，本次仍可导出 Word 和配置 JSON。
 
-打开“格式设置”即可修改当前配置。默认配置可调整、恢复出厂格式，不可删除；另外两套按需创建，可命名、复制、修改和删除。初次打开只有默认配置。
+把网页格式交给本地 AI：
 
-合法设置自动**尝试**保存在浏览器，并显示结果；保存失败时，本次仍能导出 Word 和配置 JSON。`file://` 存储由浏览器管理，清理浏览器数据、移动 HTML 或换浏览器后可能无法恢复，建议导出 JSON 备份。
+1. 在 HTML 的“格式设置”中调整并“导出 AI 配置（JSON）”。
+2. 用下方 `profiles import` 命令导入这个文件。
+3. 以后只在排版配置变化后重新导入。
 
-“导入配置”会替换当前配置集合，正文保持不变；无效 JSON、超过三套、缺少默认配置或重名会拒绝导入。配置只包含排版参数，不含正文、输入文件名或转换历史。
+**HTML 记住上次选择；CLI / AI 不指定时固定用 `default`。JSON 下载不代表 CLI 已同步。**配置仍使用 `schemaVersion: 1`，1.0.x 的合法配置继续可用。
 
-连续选择多个配置文件时，只采纳最后一次选择；等待期间手动修改配置会使旧读取失效。关闭设置或按 Escape 会放弃无效字段草稿，已合法生效的设置继续保留。
+## CLI：下载即有成品，安装 Node.js 后运行
 
-### 把网页设置交给本地 AI
+先安装 [Node.js](https://nodejs.org/en/download) 22.12 或更新版本，可运行 `node --version` 查看本机版本。
 
-1. 在 HTML 中调整好配置。
-2. 点击“导出 AI 配置（JSON）”。
-3. 用下面的 `profiles import` 命令导入下载文件。
-4. 以后配置没变就不用重复操作；只在改格式后重新导出、导入。
-
-页面记住上次选择，**AI 不指定时固定使用 `default`**。导出 JSON 只是下载文件，不代表 CLI 已自动同步。
-
-## CLI：供本地 AI 和 Skill 调用
-
-这部分需要 Node.js **22.12 或更新版本**，开发依赖使用锁定的 pnpm；HTML 用户不需要这些软件。
-
-### 首次安装与构建
+下载上方 CLI 便携包并完整解压，保留目录结构。`cli/md2word.mjs` 已打包转换依赖，只使用 Node.js 内置模块；无需安装项目依赖，不用启动 HTML 或本地服务。Windows 用根目录 `md2word.cmd`，其他环境直接用 Node。Windows 已验证，其他操作系统尚未实测。
 
 ```powershell
-git clone https://github.com/BBS6215/md2word-local.git
-cd md2word-local
-corepack pnpm install --frozen-lockfile
-corepack pnpm build
-```
-
-如果本机已有 `pnpm`，可以直接使用 `pnpm install --frozen-lockfile` 和 `pnpm build`。不用全局安装本项目，也不需要启动网页。
-
-### 转换文件
-
-```powershell
-# 默认：输入文件旁生成 Word；使用 default 配置
+# 在解压后的目录运行；未导入个人配置时，会提示使用内置默认值
 .\md2word.cmd convert --input "D:\Documents\最终 稿.md"
 
-# 指定输出路径和一套已导入的配置
-.\md2word.cmd convert --input "D:\Documents\最终 稿.md" --output "D:\Documents\交付稿.docx" --profile "会议材料"
-
-# 导入 HTML 导出的全部配置
+# 查看配置 / 导入 HTML 导出的配置
+.\md2word.cmd profiles list
 .\md2word.cmd profiles import --input "D:\Downloads\profiles.json"
 
-# 查看配置名称、ID、来源和实际配置位置
-.\md2word.cmd profiles list
+# 选一套已导入的配置；支持指定输出路径
+.\md2word.cmd convert --input "D:\Documents\最终 稿.md" --output "D:\Documents\交付稿.docx" --profile "会议材料"
+
+# 不使用 Windows 包装器时：
+node ./cli/md2word.mjs convert --input "./final.md"
 ```
 
-从其他目录或 Skill 中调用时，使用 `md2word.cmd` 的完整路径并正确加引号；Unix 系统或不使用 Windows 包装器时可以调用 `node "/path/to/md2word-local/build/cli.js" ...`。
+默认在 MD 旁生成 Word。已有同名 Word 不覆盖，会生成 `名称 (2).docx`。个人配置位于**工具目录** `.local/profiles.json`，与调用时的工作目录无关；`--config` 可指定其他配置。损坏配置、未知配置、非法 UTF-8 或 XML 字符明确失败，不静默换用其他配置。
 
-完整接口：
+成功向 stdout 输出一行 JSON；失败向 stderr 输出错误 JSON，退出码非零。结果包含 `ok`、`outputPath`、配置、统计和 `warnings`，不包含正文。完整帮助：`node ./cli/md2word.mjs --help`。
 
-```text
-convert --input <final.md> [--output <document.docx>]
-        [--profile <id-or-name>] [--config <profiles.json>]
-profiles list [--config <profiles.json>]
-profiles import --input <exported-profiles.json> [--config <destination.json>]
-```
+## AI 调用：只传最终稿路径
 
-- 输入必须是 UTF-8 的 `.md/.markdown/.txt`，原文件不删除、不改写。
-- 默认个人配置为**工具目录下** `.local/profiles.json`，与调用时所在目录无关；`--config` 可指定其他配置文件。
-- 尚未导入时使用内置默认配置并给出提示；损坏配置、明确指定但不存在的配置文件、未知配置名会失败，不静默换用其他配置。
-- 每次调用重新读取配置，开始后固定本次快照；页面最近选择不影响 CLI 默认值。
-- 已有同名 Word 不覆盖，自动生成 `名称 (2).docx` 等。
-- 配置导入先校验，再写同目录临时文件、刷新关闭、替换并回读核验；失败不会先删除旧配置。
-- 成功向 stdout 返回一行 JSON；失败向 stderr 返回错误 JSON 并以非零状态退出。结果包含输出路径、配置和提示，不包含正文。
+**模型负责写作，CLI 负责确定性转换。**最终 MD 已经落盘时，AI 直接调用 CLI，不必再次生成全文或重写 Word 生成代码。转换程序不调用大模型，不需要 API Key、MCP 或常驻服务；AI 自身理解指令和工具调用仍有上下文开销。
 
-**不需要打开 HTML，也不需要常驻服务。**转换程序不消耗模型 API Token；Skill 的命令调用、材料写作和必要审查仍有各自的成本，不承诺固定节省比例。
+可以把这段要求交给有本地命令执行能力的 AI：
 
-可选配置一个很薄的 `md2word` 快捷 Skill，以后直接说“用 md2word 把这份最终稿导出成 Word”。明确调用时，Codex 使用 `$md2word`，Claude Code 使用 `/md2word`，后面可附最终 MD 的路径。该入口需要在本机单独安装并指向真实 CLI 安装目录；不是仅下载 HTML 就自动具备的功能。
+> 使用我已安装的 Lighter · MD to Word，把指定最终 MD 转成 Word。调用安装目录下的 `cli/md2word.mjs`，只传路径；默认使用 default 配置。检查退出码、结果 JSON 的 ok、outputPath 文件是否存在，再返回实际 Word 链接和必要 warnings。不要改写源 MD 或静默换配置。
 
-创建方法和调用约定见 [AI 与 Skill 接入说明](./docs/skill-integration.md)。下载 HTML 或构建 CLI 不会自动安装或修改全局 Skill。
-
-## 支持范围与效果边界
-
-支持标题、段落、强调、超链接、嵌套列表、任务标记、基础管道表格和代码。所有输入都会进行完整转换，不会因为预览长度而截断导出。
-
-相对地址及不支持协议的链接保留“文字＋地址”，不生成可点击链接。引用定义全文有效，同名定义采用第一个。独立 `<br>` 生成空行；Markdown 分隔线按材料排版去掉，并给出转换说明，表格和普通减号保留。
-
-非法控制字符会导致 Word 文件无法正常解析，因此检测到这类字符时阻止生成并指出字符编码和位置，不静默删除正文。合法中文、换行和 emoji 不受影响。
-
-图片以替代文字占位，不读取本地或远程图片；公式保留原始文字；复杂 HTML 和脚注等未支持的排版会提示，并尽量保留可核对的文字。请按提示检查，复杂文档仍应使用专门的排版流程。
-
-本地字体检测需要支持的浏览器和授权，拒绝或返回空列表不影响手动填写和导出。字体文件不会嵌入文档，其他电脑缺字体时可能发生替换。
-
-浏览器预览为近似样式，不能保证与 Word/WPS 的分页一致，最终以实际打开和渲染结果为准。字符数是正文 Unicode 字符统计，不等同 Word 的“字数”。
-
-## 开发与验证
+从任意目录调用的 PowerShell 示例：
 
 ```powershell
-pnpm typecheck
-pnpm build
-pnpm test
-pnpm test:browser
+& node "D:\Tools\Lighter\cli\md2word.mjs" convert --input "D:\Documents\最终 稿.md"
 ```
 
-也可直接运行 `pnpm check`。核心测试包含真实 CLI 集成，因此应先构建再运行 `pnpm test`；CI 使用相同顺序。
+可选创建 `md2word` 快捷 Skill。**安装后**，Codex 用 `$md2word`，Claude Code 用 `/md2word`，或说“用 md2word 把这份最终稿导出 Word”。下载仓库不会自动安装 Skill；需将入口指向本机真实安装位置。完整模板、JSON 协议及处理规则见 [AI / Skill 接入说明](./docs/skill-integration.md)。
 
-浏览器测试在本机默认使用已安装的 Chrome；CI 使用 Playwright Chromium。没有 Chrome 时可设置 `CI=1`，并先运行 `pnpm exec playwright install chromium`。测试使用合成内容，输出位于被 Git 排除的 `test-results/`。
+## 支持范围与验证
 
-构建生成浏览器成品 `md2word.html` 及 CLI `build/cli.js`。HTML 随源码提交供直接下载，CLI 可由锁文件重新构建。发布前应检查生成的 DOCX，不能只凭测试退出码判断排版正确。
+支持标题、强调、链接、嵌套列表、任务标记、基础表格和代码。相对或不支持的链接保留文字与地址；图片使用替代文字，不加载资源；公式保留原文，复杂 HTML 不执行并提示。独立 `<br>` 生成空行；Markdown 分隔线按材料排版去掉，普通减号与表格保留。非法 XML 字符会阻止导出并提示位置。
 
-架构说明见 [docs/architecture.md](./docs/architecture.md)，本次验证环境和结果见 [docs/validation.md](./docs/validation.md)。
+已完成 1.1.0 的 72 项回归、Chrome / Edge 相关检查、真实浏览器下载、OOXML 校验、WPS 打开及页面渲染；本次预打包 CLI 另做脱离源码和 node_modules 的运行检查。具体结果及未实测平台见 [验证记录](./docs/validation.md)。
+
+## 从源码开发
+
+仅修改源码或重建成品时需要开发依赖。普通 HTML / CLI 使用者按前文下载即可。
+
+```powershell
+corepack pnpm install --frozen-lockfile
+corepack pnpm check
+```
+
+构建生成 `md2word.html`、公开分发的 `cli/md2word.mjs` 和 `downloads/lighter-md-to-word-cli.zip`，并保留开发兼容入口 `build/cli.js`。CI 检查公开成品可重建。[架构](./docs/architecture.md) · [验证记录](./docs/validation.md)
 
 ## 许可证
 
-[MIT](./LICENSE)。部分递归转换思路适配自同一作者的 `markdown-to-pdf`；第三方依赖和许可说明见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。个人配置、真实材料、输入正文、字体和转换成品不应提交到公开仓库。
+[MIT](./LICENSE)。第三方依赖声明见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) 和 [许可证全文](./THIRD_PARTY_LICENSES.txt)，HTML 与 CLI 也内嵌运行依赖许可。字体文件、个人配置、真实材料及转换成品不随仓库分发。

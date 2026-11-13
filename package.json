@@ -3,18 +3,18 @@
   "version": "1.1.0",
   "private": true,
   "type": "module",
-  "description": "Offline Markdown to Word with a standalone HTML app and a local CLI",
+  "description": "Lighter · MD to Word: a sub-1 MB offline HTML app with a bundled CLI for local AI workflows",
   "license": "MIT",
   "engines": { "node": ">=22.12" },
   "packageManager": "pnpm@10.28.1",
-  "bin": { "md2word": "./build/cli.js" },
+  "bin": { "md2word": "./cli/md2word.mjs" },
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "node scripts/build.mjs",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:browser": "playwright test",
-    "cli": "node build/cli.js",
+    "cli": "node cli/md2word.mjs",
     "check": "pnpm typecheck && pnpm build && pnpm test && pnpm test:browser"
   },
   "dependencies": {

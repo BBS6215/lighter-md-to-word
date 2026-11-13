@@ -18,6 +18,6 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm build
       - run: pnpm test
-      - run: git diff --exit-code -- md2word.html THIRD_PARTY_LICENSES.txt examples/profiles.example.json
+      - run: git diff --exit-code -- md2word.html cli/md2word.mjs downloads/lighter-md-to-word-cli.zip THIRD_PARTY_LICENSES.txt examples/profiles.example.json
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:browser

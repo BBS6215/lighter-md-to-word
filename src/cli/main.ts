@@ -7,7 +7,7 @@ import { generateWord } from '../core/word';
 import { importProfiles, readProfiles, writeUniqueDocx } from './storage';
 import { version } from '../../package.json';
 
-const HELP = `md2word-local ${version} — offline Markdown to Word
+const HELP = `Lighter · MD to Word ${version} (md2word) — offline Markdown to Word
 
 convert --input <final.md> [--output <document.docx>] [--profile <id-or-name>] [--config <profiles.json>]
 profiles list [--config <profiles.json>]
